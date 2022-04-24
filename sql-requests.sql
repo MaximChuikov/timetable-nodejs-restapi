@@ -53,20 +53,10 @@ INSERT INTO public.student (subgroup_id, last_seen)
 	   VALUES (_subgroup_id, CURRENT_DATE);
 
 
-CREATE OR REPLACE FUNCTION getTimetable(_vk_id INTEGER) RETURNS JSONB
-AS
-$timetable$
-DECLARE
-timetable JSONB;
-BEGIN
-	SELECT subg.subgroup_timetable INTO timetable FROM public.student as st
-	JOIN public.subgroup as subg
-	ON subg.subgroup_id = st.subgroup_id
-	WHERE st.vk_id = _vk_id;
-	RETURN timetable;
-END;
-$timetable$
-LANGUAGE plpgsql;
+
+
+
+
 
 
 UPDATE public.subgroup SET subgroup_timetable = '{"sql-is-what": "its poop"}' WHERE subgroup_id = 1
