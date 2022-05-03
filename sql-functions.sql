@@ -41,3 +41,43 @@ $$
 LANGUAGE plpgsql;
 
 RAISE EXCEPTION 'Студента с id % не существует', _vk_id;
+
+
+CREATE OR REPLACE FUNCTION getFaculties() RETURNS TABLE(faculty_id INTEGER, faculty_name VARCHAR)
+AS
+$body$
+BEGIN
+	RETURN QUERY
+		SELECT * FROM public.faculty;
+END;
+$body$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION getGroups(_faculty_id INTEGER) RETURNS TABLE(group_id INTEGER, group_name VARCHAR)
+AS
+$body$
+BEGIN
+	IF NOT EXISTS(SELECT * FROM public.faculty as f WHERE f.faculty_id = _faculty_id)
+		THEN RAISE EXCEPTION 'Факультета с id = % не существует', _faculty_id;
+	END IF;
+	RETURN QUERY
+		SELECT stg.group_id, stg.group_name FROM public.students_group as stg WHERE faculty_id = _faculty_id;
+END;
+$body$
+LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION getSubgroups(_group_id INTEGER) RETURNS TABLE(group_id INTEGER, group_name VARCHAR)
+AS
+$body$
+BEGIN
+	IF NOT EXISTS(SELECT * FROM public.students_group as sg WHERE sg.group_id = _group_id)
+		THEN RAISE EXCEPTION 'Группы с id = % не существует', _group_id;
+	END IF;
+	RETURN QUERY
+		SELECT sg.subgroup_id, sg.subgroup_name FROM public.subgroup as sg WHERE sg.group_id = _group_id;
+END;
+$body$
+LANGUAGE plpgsql;
