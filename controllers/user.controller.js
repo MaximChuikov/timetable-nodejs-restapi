@@ -1,8 +1,6 @@
 const db = require('../database-config')
-const parser = require('./jsonTimetableParser');
 
 class UserController{
-
     async createStudent(req, res){
         const vk_id = req.params.vk_id;
         const subgroup_id = req.params.subgroup_id;
@@ -13,50 +11,28 @@ class UserController{
             res.json(e);
         }
     }
-    static async getSubgroupTimetable(req) {
-        const id = req.params.vk_id;
-        try{
-            const answer = await db.query(`SELECT getTimetable(${id})`);
-            return answer.rows[0];
-        }catch (e){
-            console.log(e);
-        }
+
+    async getTimetable(req, res){
+        await db.query(`SELECT * FROM get_student_timetable(${req.params.vk_id})`)
+            .then((r) =>{
+                res.json(r.rows);
+            })
+            .catch((e) =>{
+                res.json(e);
+            })
     }
-    async getTodayTimetable(req, res){
-        try{
-            const timetable = await UserController.getSubgroupTimetable(req);
-            res.json(parser.getDay(parser.days.today, timetable.gettimetable));
-        }
-        catch (e){
-            console.log(e);
-        }
-    }
-    async getTomorrowTimetable(req, res){
-        try{
-            const timetable = await UserController.getSubgroupTimetable(req);
-            res.json(parser.getDay(parser.days.tomorrow, timetable.gettimetable));
-        }
-        catch (e){
-            console.log(e);
-        }
-    }
-    async getCurrentWeekTimetable(req, res){
-        try{
-            const timetable = await UserController.getSubgroupTimetable(req);
-            res.json(parser.getWeek(parser.weeks.currentWeek, timetable.gettimetable));
-        }
-        catch (e){
-            console.log(e);
-        }
-    }
-    async getOtherWeekTimetable(req, res){
-        try{
-            const timetable = await UserController.getSubgroupTimetable(req);
-            res.json(parser.getWeek(parser.weeks.otherWeek, timetable.gettimetable));
-        }
-        catch (e){
-            console.log(e);
-        }
+
+    async getToday(req, res){
+        await db.query(`SELECT * FROM public.get_student_day_timetable(
+                ${req.params.vk_id}, 
+                ${req.params.week},
+                ${req.params.day})`)
+            .then((r) =>{
+                res.json(r.rows);
+            })
+            .catch((e) =>{
+                res.json(e);
+            })
     }
 
     async studentExists(req, res){
@@ -68,11 +44,6 @@ class UserController{
             res.json(e);
         }
     }
-
-    async requestGroupCreation(req, res){
-        
-    }
-
     async getFaculties(req, res){
         try{
             const answer = await db.query('SELECT * FROM getFaculties()');

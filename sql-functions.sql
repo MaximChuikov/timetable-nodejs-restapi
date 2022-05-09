@@ -81,3 +81,42 @@ BEGIN
 END;
 $body$
 LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION create_or_get_day_timetable_id(
+	_group_id integer,
+	_week integer,
+	_day_id integer
+)
+RETURNS INTEGER
+AS
+$BODY$
+DECLARE
+day_id INTEGER;
+BEGIN
+	SELECT day_timetable_id INTO day_id FROM
+		public.group_timetable as gr,
+		public.group_day_connector,
+		public.day_timetable as day
+			WHERE
+				gr.group_id = _group_id AND
+				day.week_number = _week AND
+				day.day_of_week_id = _day_id;
+	IF NOT FOUND
+	THEN
+		INSERT INTO public.day_timetable
+			(week_number, day_of_week_id)
+			VALUES (_week, _day_id)
+			RETURNING day_timetable_id INTO day_id;
+		INSERT INTO public.group_day_connector
+			(timetable_id, daytimetable_id)
+			VALUES (
+				(SELECT timetable_id FROM public.group_timetable
+					WHERE group_id = _group_id),
+				day_id
+			);
+	END IF;
+	RETURN day_id;
+END;
+$BODY$
+LANGUAGE plpgsql;
