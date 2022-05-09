@@ -22,11 +22,35 @@ class UserController{
             })
     }
 
-    async getToday(req, res){
+    async getDay(req, res){
         await db.query(`SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${req.params.week},
                 ${req.params.day})`)
+            .then((r) =>{
+                res.json(r.rows);
+            })
+            .catch((e) =>{
+                res.json(e);
+            })
+    }
+    async getToday(req, res){
+        await db.query(`SELECT * FROM public.get_student_day_timetable(
+                ${req.params.vk_id}, 
+                ${Math.floor(((3) / 7 + new Date().getTime() / 604800000) % 2)} + 1,
+                ${new Date().getDay() - 1 == -1 ? 6 : new Date().getDay() - 1})`)
+            .then((r) =>{
+                res.json(r.rows);
+            })
+            .catch((e) =>{
+                res.json(e);
+            })
+    }
+    async getTomorrow(req, res){
+        await db.query(`SELECT * FROM public.get_student_day_timetable(
+                ${req.params.vk_id}, 
+                ${Math.floor(((7 + 3) / 7 + new Date().getTime() / 604800000) % 2)  + 1},
+                ${(new Date().getDay() - 1 == -1 ? 6 : new Date().getDay() - 1 + 1) % 7})`)
             .then((r) =>{
                 res.json(r.rows);
             })
