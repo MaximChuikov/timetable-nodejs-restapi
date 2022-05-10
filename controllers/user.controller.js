@@ -62,7 +62,7 @@ class UserController{
     async studentExists(req, res){
         const vk_id = req.params.vk_id;
         try{
-            const answer = await db.query(`SELECT studentExists(${vk_id})`);
+            const answer = await db.query(`SELECT * FROM student_exists(${vk_id})`);
             res.json(answer.rows[0]);
         }catch (e){
             res.json(e);
@@ -70,7 +70,7 @@ class UserController{
     }
     async getFaculties(req, res){
         try{
-            const answer = await db.query('SELECT * FROM getFaculties()');
+            const answer = await db.query('SELECT * FROM get_faculties()');
             res.json(answer.rows); //массив данных id name
         }catch (e){
             res.json(e);
@@ -79,7 +79,7 @@ class UserController{
     async getGroups(req, res){
         try{
             const f_id = req.params.faculty_id;
-            const answer = await db.query(`SELECT * FROM getGroups(${f_id})`);
+            const answer = await db.query(`SELECT * FROM get_groups(${f_id})`);
             res.json(answer.rows); //массив данных id name
         }catch (e){
             res.json(e);
@@ -88,7 +88,7 @@ class UserController{
     async getSubgroups(req, res){
         try{
             const g_id = req.params.group_id;
-            const answer = await db.query(`SELECT * FROM getSubgroups(${g_id})`);
+            const answer = await db.query(`SELECT * FROM get_subgroups(${g_id})`);
             res.json(answer.rows); //массив данных id name
         }catch (e){
             res.json(e);
