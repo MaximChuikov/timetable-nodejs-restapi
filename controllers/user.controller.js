@@ -5,7 +5,7 @@ class UserController{
         const vk_id = req.params.vk_id;
         const subgroup_id = req.params.subgroup_id;
         try{
-            const answer = await db.query(`CALL createStudent(${vk_id}, ${subgroup_id})`);
+            const answer = await db.query(`CALL create_student(${vk_id}, ${subgroup_id})`);
             res.json(answer.rows[0]);
         }catch (e){
             res.json(e);
@@ -38,7 +38,7 @@ class UserController{
         await db.query(`SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${Math.floor(((3) / 7 + new Date().getTime() / 604800000) % 2)} + 1,
-                ${new Date().getDay() === 0 ? 7 : new Date().getDay()})`)
+                ${new Date().getDay() === 0 ? 7 : new Date().getDay()}`)
             .then((r) =>{
                 res.json(r.rows);
             })
@@ -51,7 +51,7 @@ class UserController{
                 SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${Math.floor(((7 + 3) / 7 + new Date().getTime() / 604800000) % 2)  + 1},
-                ${new Date().getDay() + 1 === 0 ? 7 : new Date().getDay()}
+                ${new Date().getDay() === 0 ? 1 : new Date().getDay() + 1}
                 )`)
             .then((r) =>{
                 res.json(r.rows);
@@ -93,6 +93,14 @@ class UserController{
             const g_id = req.params.group_id;
             const answer = await db.query(`SELECT * FROM get_subgroups(${g_id})`);
             res.json(answer.rows); //массив данных id name
+        }catch (e){
+            res.json(e);
+        }
+    }
+    async getWeekDays(req, res){
+        try{
+            const answer = await db.query(`SELECT * FROM get_week_days()`);
+            res.json(answer.rows)
         }catch (e){
             res.json(e);
         }
