@@ -41,7 +41,7 @@ class UserController{
                 ${new Date().getDay() === 0 ? 7 : new Date().getDay()})`)
         await db.query(`SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
-                ${Math.floor(((0 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
+                ${Math.floor(((7 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
                 ${new Date().getDay() === 0 ? 7 : new Date().getDay()})`)
             .then((r) =>{
                 res.json(r.rows);
@@ -54,7 +54,7 @@ class UserController{
         await db.query(`
                 SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
-                ${Math.floor(((1 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
+                ${Math.floor(((8 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
                 ${new Date().getDay() === 0 ? 1 : new Date().getDay() + 1}
                 )`)
             .then((r) =>{
