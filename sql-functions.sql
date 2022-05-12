@@ -120,3 +120,120 @@ BEGIN
 END;
 $BODY$
 LANGUAGE plpgsql;
+
+
+
+
+CREATE FUNCTION lesson_already_exists()
+AS
+$BODY$
+DECLARE
+group_id INTEGER,
+subgroup_id INTEGER
+BEGIN
+	WITH timetable AS(
+		SELECT * FROM
+			public.lesson as lesson,
+			public.day_timetable as dayt
+		WHERE
+			lesson.lesson_id = NEW.lesson_id AND
+			dayt.day_timetable_id = NEW.day_timetable_id
+	)
+
+	SELECT
+		gr.group_id INTO group_id
+	FROM
+		public.students_group as gr,
+		public.group_timetable as grt,
+		public.group_day_connector as grcon,
+		public.day_timetable as dayt,
+		public.lesson as lesson
+	WHERE
+		grt.group_id = gr.group_id AND
+		grcon.timetable_id = grt.timetable_id AND
+		grcon.daytimetable_id = dayt.day_timetable_id AND
+		lesson.day_timetable_id = dayt.day_timetable_id AND
+		lesson.lesson_id = NEW.
+	IF FOUND
+		THEN
+
+
+		ELSE
+			SELECT
+				subgr.subgroup_id INTO subgroup_id
+			FROM
+				public.subgroup as subgr,
+				public.students_group as gr,
+				public.subgroup_timetable as subgrt,
+				public.subgroup_day_connector as subgrcon,
+				public.day_timetable as dayt,
+				public.lesson as lesson
+			WHERE
+				gr.group_id = subgr.group_id AND
+				subgrt.subgroup_id = subgr.subgroup_id AND
+				subgrcon.timetable_id = subgrt.timetable_id AND
+				subgrcon.daytimetable_id = dayt.day_timetable_id AND
+				lesson.day_timetable_id = dayt.day_timetable_id AND
+				lesson.lesson_id = NEW.lesson_id;
+
+			IF COUNT(
+				SELECT * FROM
+-- 					timetable,
+					public.get_group_timetable((SELECT sb.group_id FROM public.subgroup as sb
+											   		WHERE sb.subgroup_id = 1))
+			) > 1
+
+
+
+
+
+UNION
+
+
+
+
+		SELECT * FROM subject
+
+
+
+)
+	SELECT
+		timetable.week_number,
+		days.day_id,
+		days.day_name,
+		bells.pair_number,
+		TO_CHAR(bells.pair_start, 'hh24:mi'),
+		TO_CHAR(bells.pair_end, 'hh24:mi'),
+		subject.subject_name,
+		timetable.cabinet,
+		lecturer.lecturer_name
+	FROM
+		timetable,
+		public.days_of_week as days,
+		public.subject as subject,
+		public.bells as bells,
+		public.lecturer as lecturer
+SELECT * FROM LESSON
+
+	SELECT
+		timetable.week_number,
+		days.day_id,
+		days.day_name,
+		bells.pair_number,
+		TO_CHAR(bells.pair_start, 'hh24:mi'),
+		TO_CHAR(bells.pair_end, 'hh24:mi'),
+		subject.subject_name,
+		timetable.cabinet,
+		lecturer.lecturer_name
+	FROM
+		timetable,
+		public.days_of_week as days,
+		public.subject as subject,
+		public.bells as bells,
+		public.lecturer as lecturer
+	SELECT * timetable
+		WHERE
+			timetable.week_number = NEW.
+END;
+$BODY$
+LANGUAGE 'plpgsql';

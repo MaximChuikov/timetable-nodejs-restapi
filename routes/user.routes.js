@@ -9,7 +9,7 @@ router.get('/getToday/:vk_id', userController.getToday)
 router.get('/getTomorrow/:vk_id', userController.getTomorrow)
 router.get('/studentExists/:vk_id', userController.studentExists)
 router.get('/getFaculties', userController.getFaculties)
-router.get('/getGroups/:faculty_id', userController.getGroups)
+router.get('/getGroups/:faculty_id&:course', userController.getGroups)
 router.get('/getSubgroups/:group_id', userController.getSubgroups)
 
 

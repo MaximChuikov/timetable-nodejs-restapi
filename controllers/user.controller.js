@@ -38,7 +38,7 @@ class UserController{
         await db.query(`SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${Math.floor(((3) / 7 + new Date().getTime() / 604800000) % 2)} + 1,
-                ${new Date().getDay() - 1 == -1 ? 6 : new Date().getDay() - 1})`)
+                ${new Date().getDay() === 0 ? 7 : new Date().getDay()})`)
             .then((r) =>{
                 res.json(r.rows);
             })
@@ -47,10 +47,12 @@ class UserController{
             })
     }
     async getTomorrow(req, res){
-        await db.query(`SELECT * FROM public.get_student_day_timetable(
+        await db.query(`
+                SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${Math.floor(((7 + 3) / 7 + new Date().getTime() / 604800000) % 2)  + 1},
-                ${(new Date().getDay() - 1 == -1 ? 6 : new Date().getDay() - 1 + 1) % 7})`)
+                ${new Date().getDay() + 1 === 0 ? 7 : new Date().getDay()}
+                )`)
             .then((r) =>{
                 res.json(r.rows);
             })
@@ -79,7 +81,8 @@ class UserController{
     async getGroups(req, res){
         try{
             const f_id = req.params.faculty_id;
-            const answer = await db.query(`SELECT * FROM get_groups(${f_id})`);
+            const course = req.params.course
+            const answer = await db.query(`SELECT * FROM get_groups(${f_id}, ${course})`);
             res.json(answer.rows); //массив данных id name
         }catch (e){
             res.json(e);
