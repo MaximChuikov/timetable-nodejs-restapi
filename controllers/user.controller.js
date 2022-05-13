@@ -1,5 +1,19 @@
 const db = require('../database-config')
 
+function todayWeek(){
+    return Math.floor(((7 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1;
+}
+function tomorrowWeek(){
+    return Math.floor(((8 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1;
+}
+function today(){
+    return new Date().getDay() === 0 ? 7 : new Date().getDay();
+}
+function tomorrow(){
+    return new Date().getDay() === 0 ? 1 : new Date().getDay() + 1;
+}
+
+
 class UserController{
     async createStudent(req, res){
         const vk_id = req.params.vk_id;
@@ -34,11 +48,33 @@ class UserController{
                 res.json(e);
             })
     }
+    async getTodayOfWeek(req, res){
+        await db.query(`SELECT * FROM public.get_week_days()`)
+            .then((r) =>{
+                try{
+                    const a = r.rows.filter(x => x.day_id == today());
+                    res.json(a);
+                }catch (e){
+                    res.json([]);
+                }
+            }).catch((e) =>{
+                res.json(e);
+            });
+    }
+    async getTomorrowOfWeek(req, res){
+        await db.query(`SELECT * FROM public.get_week_days()`)
+            .then((r) =>{
+                try{
+                    const a = r.rows.filter(x => x.day_id == tomorrow());
+                    res.json(a);
+                }catch (e){
+                    res.json([]);
+                }
+            }).catch((e) =>{
+                res.json(e);
+            });
+    }
     async getToday(req, res){
-        console.log(`SELECT * FROM public.get_student_day_timetable(
-                ${req.params.vk_id}, 
-                ${Math.floor(((0 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
-                ${new Date().getDay() === 0 ? 7 : new Date().getDay()})`)
         await db.query(`SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
                 ${Math.floor(((7 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
@@ -54,8 +90,8 @@ class UserController{
         await db.query(`
                 SELECT * FROM public.get_student_day_timetable(
                 ${req.params.vk_id}, 
-                ${Math.floor(((8 - 4) / 7 + new Date().getTime() / 604800000) % 2) + 1},
-                ${new Date().getDay() === 0 ? 1 : new Date().getDay() + 1}
+                ${tomorrowWeek()},
+                ${tomorrow()}
                 )`)
             .then((r) =>{
                 res.json(r.rows);

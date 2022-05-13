@@ -12,5 +12,7 @@ router.get('/getFaculties', userController.getFaculties)
 router.get('/getGroups/:faculty_id&:course', userController.getGroups)
 router.get('/getSubgroups/:group_id', userController.getSubgroups)
 router.get('/getWeekDays', userController.getWeekDays)
+router.get('/getTodayOfWeek', userController.getTodayOfWeek)
+router.get('/getTomorrowOfWeek', userController.getTomorrowOfWeek)
 
 module.exports = router
