@@ -20,13 +20,15 @@ function groupingWeekTimetable(json) {
     const groupByWeek =
         json.reduce((group, product) => {
             const {week} = product;
-            group[week] = group[week] ?? [];
+            if (group[week] == null)
+                group[week] = [];
             group[week].push(product);
             return group;
         }, {});
     const groupByDay = (arr) => arr.reduce((group, product) => {
         const {day_number} = product;
-        group[day_number] = group[day_number] ?? [];
+        if (group[day_number] == null)
+            group[day_number] = [];
         group[day_number].push(product);
         return group;
     }, {});
@@ -150,7 +152,7 @@ class UserController {
     async getFaculties(req, res) {
         try {
             const answer = await db.query('SELECT * FROM get_faculties()');
-            res.json(answer.rows); //массив данных id name
+            res.json(answer.rows);
         } catch (e) {
             res.json(e);
         }
