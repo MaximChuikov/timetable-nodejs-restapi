@@ -176,15 +176,6 @@ class UserController {
             res.json(e);
         }
     }
-
-    async getWeekDays(req, res) {
-        try {
-            const answer = await db.query(`SELECT * FROM get_week_days()`);
-            res.json(answer.rows)
-        } catch (e) {
-            res.json(e);
-        }
-    }
 }
 
 module.exports = new UserController()
