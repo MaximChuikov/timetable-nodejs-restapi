@@ -16,8 +16,48 @@ function tomorrow() {
     return new Date().getDay() === 0 ? 1 : new Date().getDay() + 1;
 }
 
+function groupingWeekTimetable(json) {
+    const groupByWeek =
+        json.reduce((group, product) => {
+            const {week} = product;
+            group[week] = group[week] ?? [];
+            group[week].push(product);
+            return group;
+        }, {});
+    const groupByDay = (arr) => arr.reduce((group, product) => {
+        const {day_number} = product;
+        group[day_number] = group[day_number] ?? [];
+        group[day_number].push(product);
+        return group;
+    }, {});
+    const collectToArr = (instance) => {
+        const list = [7];
+        for (let i = 1; i <= 7; i++)
+            list[i - 1] = instance[i.toString()];
+        return list;
+    }
+
+    function processWeek(week_name) {
+        const groupByWeekDay = groupByDay(groupByWeek[week_name]);
+        return groupByWeekDay === undefined ? collectToArr([]) : collectToArr(groupByWeekDay);
+    }
+
+    try {
+        return {
+            '1': processWeek("1"),
+            '2': processWeek("2")
+        }
+    } catch (e) {
+        return e;
+    }
+}
+
 
 class UserController {
+
+    /*
+        Student & timetable methods
+     */
     async createStudent(req, res) {
         const vk_id = req.params.vk_id;
         const subgroup_id = req.params.subgroup_id;
@@ -31,25 +71,22 @@ class UserController {
 
     async getTimetable(req, res) {
         await db.query(`SELECT * FROM get_student_timetable(${req.params.vk_id})`)
-            .then((r) => {
-                res.json(r.rows);
+            .then(async (r) => {
+                try {
+                    const timetable = groupingWeekTimetable(r.rows);
+                    const days = await db.query(`SELECT * FROM public.get_week_days()`).then(r => r.rows);
+                    for (let i = 1; i <= 7; i++) {
+                        if(timetable["1"][i - 1] == null)
+                            timetable["1"][i - 1] = days.find(x => x.day_number === i)
+                        if(timetable["2"][i - 1] == null)
+                            timetable["2"][i - 1] = days.find(x => x.day_number === i)
+                    }
+                    res.json(timetable);
+                } catch (e) {
+                    res.json(e);
+                }
             })
-            .catch((e) => {
-                res.json(e);
-            })
-    }
-
-    async getDay(req, res) {
-        await db.query(`SELECT * FROM public.get_student_day_timetable(
-                ${req.params.vk_id}, 
-                ${req.params.week},
-                ${req.params.day})`)
-            .then((r) => {
-                res.json(r.rows);
-            })
-            .catch((e) => {
-                res.json(e);
-            })
+            .catch((e) => res.json(e));
     }
 
     async getToday(req, res) {
@@ -65,29 +102,36 @@ class UserController {
                             .then((re) => {
                                 const day = today();
                                 res.json(re.rows.find(x => x.day_number === day));
-                            });
+                            }).catch((e) => res.json(e));
                     }
                     fetchDayName();
-                }
-                else {
+                } else {
                     res.json(r.rows);
                 }
             }).catch((e) => res.json(e));
     }
 
     async getTomorrow(req, res) {
-        await db.query(`
-                SELECT * FROM public.get_student_day_timetable(
-                ${req.params.vk_id}, 
+        await db.query(`SELECT * FROM public.get_student_day_timetable(
+                ${req.params.vk_id},
                 ${tomorrowWeek()},
                 ${tomorrow()}
-                )`)
+            )`)
             .then((r) => {
-                res.json(r.rows);
-            })
-            .catch((e) => {
-                res.json(e);
-            })
+                if (r.rows.length === 0) {
+                    async function fetchDayName() {
+                        await db.query(`SELECT * FROM public.get_week_days()`)
+                            .then((re) => {
+                                const day = tomorrow();
+                                res.json(re.rows.find(x => x.day_number === day));
+                            }).catch((e) => res.json(e));
+                    }
+
+                    fetchDayName();
+                } else {
+                    res.json(r.rows);
+                }
+            }).catch((e) => res.json(e));
     }
 
     async studentExists(req, res) {
@@ -100,6 +144,9 @@ class UserController {
         }
     }
 
+    /*
+        Group response methods
+     */
     async getFaculties(req, res) {
         try {
             const answer = await db.query('SELECT * FROM get_faculties()');
